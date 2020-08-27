@@ -25,7 +25,7 @@
         style="?android:listSeparatorTextViewStyle"
         android:text="@string/crime_details_label"/>
 
-    <TextView
+    <Button
         android:id="@+id/crime_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -80,7 +80,7 @@ class CrimeListFragment : Fragment() {
             var view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
             if(getItemViewType(viewType) == 1)
                 view = layoutInflater.inflate(R.layout.list_item_special_crime, parent, false)
-            
+
             Log.d("DEBUG", getItemViewType(viewType).toString())
 
             return CrimeHolder(view)
@@ -93,6 +93,7 @@ class CrimeListFragment : Fragment() {
             holder.apply {
                 holder.bind(crime)
             }
+
         }
 
         override fun getItemViewType(position: Int): Int =

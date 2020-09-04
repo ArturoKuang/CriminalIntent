@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.lang.Exception
+import java.text.DateFormat
 
 
 private const val TAG = "CrimeListFragment"
@@ -66,7 +67,9 @@ class CrimeListFragment : Fragment() {
             fun bind(crime: Crime) {
                 this.crime = crime
                 titleTextView.text = this.crime.title
-                datTextView.text = this.crime.date.toString()
+                val df = DateFormat.getDateInstance(DateFormat.SHORT)
+                datTextView.text = df.format(this.crime.date).toString()
+
                 solvedImageView.visibility = if (crime.isSolved) {
                     View.VISIBLE
                 } else {
@@ -94,7 +97,8 @@ class CrimeListFragment : Fragment() {
         fun bind(crime: Crime) {
             this.crime = crime
             titleTextView.text = this.crime.title
-            datTextView.text = this.crime.date.toString()
+            val df = DateFormat.getDateInstance(DateFormat.SHORT)
+            datTextView.text = df.format(this.crime.date).toString()
         }
 
         override fun onClick(p0: View?) {
@@ -110,7 +114,7 @@ class CrimeListFragment : Fragment() {
                 : RecyclerView.ViewHolder {
 
             var view:View
-            return when(getItemViewType(viewType)) {
+            return when(viewType) {
                 TYPE_SPECIAL_CRIME -> {
                     view = layoutInflater.inflate(R.layout.list_item_special_crime, parent, false)
                     SpecialCrimeHolder(view)
@@ -139,9 +143,13 @@ class CrimeListFragment : Fragment() {
             }
         }
 
-        override fun getItemViewType(position: Int): Int =
-            if(crimes[position].requiresPolice) TYPE_SPECIAL_CRIME
-            else  TYPE_CRIME
+        override fun getItemViewType(position: Int): Int {
+            return if(crimes[position].requiresPolice) {
+                TYPE_SPECIAL_CRIME
+            } else {
+                TYPE_CRIME
+            }
+        }
     }
 
     private fun updateUI() {

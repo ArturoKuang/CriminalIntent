@@ -6,15 +6,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewParent
+import android.widget.GridLayout
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.lang.Exception
 
 
 private const val TAG = "CrimeListFragment"
+private const val TYPE_CRIME = 0
+private const val TYPE_SPECIAL_CRIME = 1
 
 class CrimeListFragment : Fragment() {
 
@@ -52,6 +57,7 @@ class CrimeListFragment : Fragment() {
             private lateinit var crime: Crime
             private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
             private val datTextView: TextView  = itemView.findViewById(R.id.crime_date)
+            private val solvedImageView: ImageView = itemView.findViewById(R.id.crime_solved)
 
             init {
                 itemView.setOnClickListener(this)
@@ -61,44 +67,81 @@ class CrimeListFragment : Fragment() {
                 this.crime = crime
                 titleTextView.text = this.crime.title
                 datTextView.text = this.crime.date.toString()
+                solvedImageView.visibility = if (crime.isSolved) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             }
+
+            override fun onClick(p0: View?) {
+                Toast.makeText(context, "${crime.title} pressed", Toast.LENGTH_SHORT)
+                    .show()
+            }
+    }
+
+    private inner class SpecialCrimeHolder(view: View):
+        RecyclerView.ViewHolder(view), View.OnClickListener {
+
+        private lateinit var crime: Crime
+        private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
+        private val datTextView: TextView  = itemView.findViewById(R.id.crime_date)
+
+        init {
+            itemView.setOnClickListener(this)
+        }
+
+        fun bind(crime: Crime) {
+            this.crime = crime
+            titleTextView.text = this.crime.title
+            datTextView.text = this.crime.date.toString()
+        }
 
         override fun onClick(p0: View?) {
             Toast.makeText(context, "${crime.title} pressed", Toast.LENGTH_SHORT)
                 .show()
         }
-
-
     }
 
     private inner class CrimeAdapter(var crimes: List<Crime>)
-        : RecyclerView.Adapter<CrimeHolder>() {
+        : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-                : CrimeHolder {
+                : RecyclerView.ViewHolder {
 
-            var view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
-            if(getItemViewType(viewType) == 1)
-                view = layoutInflater.inflate(R.layout.list_item_special_crime, parent, false)
-
-            Log.d("DEBUG", getItemViewType(viewType).toString())
-
-            return CrimeHolder(view)
+            var view:View
+            return when(getItemViewType(viewType)) {
+                TYPE_SPECIAL_CRIME -> {
+                    view = layoutInflater.inflate(R.layout.list_item_special_crime, parent, false)
+                    SpecialCrimeHolder(view)
+                }
+                TYPE_CRIME -> {
+                    view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
+                    CrimeHolder(view)
+                }
+                else -> throw Exception("ViewType is not supported")
+            }
         }
 
         override fun getItemCount(): Int = crimes.size
 
-        override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val crime = crimes[position]
-            holder.apply {
-                holder.bind(crime)
-            }
 
+            if (holder is CrimeHolder) {
+                holder.apply {
+                    bind(crime)
+                }
+            } else if (holder is SpecialCrimeHolder) {
+                holder.apply {
+                    bind(crime)
+                }
+            }
         }
 
         override fun getItemViewType(position: Int): Int =
-            if(crimes[position].requiresPolice) 1
-            else  0
+            if(crimes[position].requiresPolice) TYPE_SPECIAL_CRIME
+            else  TYPE_CRIME
     }
 
     private fun updateUI() {

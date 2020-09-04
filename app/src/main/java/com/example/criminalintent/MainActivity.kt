@@ -1,9 +1,7 @@
 package com.example.criminalintent
 
-import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import java.util.*
 
 private const val TAG = "MainActivity"
@@ -26,10 +24,12 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onCrimeSelected(crimeId: UUID) {
-        val fragment = CrimeFragment()
+        val fragment = CrimeFragment.newInstance(crimeId)
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
             .commit()
     }
+
 }

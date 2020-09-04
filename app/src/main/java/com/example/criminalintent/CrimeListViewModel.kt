@@ -1,6 +1,5 @@
 package com.example.criminalintent
 
-
 import androidx.lifecycle.ViewModel
 import com.example.criminalintent.database.CrimeRepository
 

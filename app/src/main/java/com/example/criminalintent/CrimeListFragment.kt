@@ -67,7 +67,7 @@ class CrimeListFragment : Fragment() {
             fun bind(crime: Crime) {
                 this.crime = crime
                 titleTextView.text = this.crime.title
-                val df = DateFormat.getDateInstance(DateFormat.SHORT)
+                val df = DateFormat.getDateInstance(DateFormat.LONG)
                 datTextView.text = df.format(this.crime.date).toString()
 
                 solvedImageView.visibility = if (crime.isSolved) {
@@ -97,8 +97,7 @@ class CrimeListFragment : Fragment() {
         fun bind(crime: Crime) {
             this.crime = crime
             titleTextView.text = this.crime.title
-            val df = DateFormat.getDateInstance(DateFormat.SHORT)
-            datTextView.text = df.format(this.crime.date).toString()
+            datTextView.text = this.crime.date.toString()
         }
 
         override fun onClick(p0: View?) {

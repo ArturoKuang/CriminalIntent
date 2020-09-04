@@ -2,6 +2,7 @@ package com.example.criminalintent
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.criminalintent.CrimeFragment.Companion.newInstance
 import java.util.*
 
 private const val TAG = "MainActivity"

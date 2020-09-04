@@ -6,15 +6,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewParent
-import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import java.lang.Exception
 import java.text.DateFormat
@@ -33,7 +32,7 @@ class CrimeListFragment : Fragment() {
 
     private var callbacks: Callbacks? = null
     private lateinit var crimeRecyclerView: RecyclerView
-    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
+    private var adapter: CrimeAdapter? = CrimeAdapter()
 
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProvider(this).get(CrimeListViewModel::class.java)
@@ -61,13 +60,14 @@ class CrimeListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.i(TAG, "onviewcreated")
         crimeListViewModel.crimesListLiveData.observe(
             viewLifecycleOwner,
             Observer {
                 crimes ->
                     crimes?.let {
                         Log.i(TAG, "Got crimes ${crimes.size}")
-                        updateUI(crimes)
+                        updateUI(crimes as MutableList<Crime>)
                     }
             }
         )
@@ -125,12 +125,12 @@ class CrimeListFragment : Fragment() {
         }
     }
 
-    private inner class CrimeAdapter(var crimes: List<Crime>)
-        : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private inner class CrimeAdapter()
+        : ListAdapter<Crime, RecyclerView.ViewHolder>(CrimeDiffCallback()) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
                 : RecyclerView.ViewHolder {
-
+            Log.i(TAG, "Adapter onCreateViewHolder")
             var view:View
             return when(viewType) {
                 TYPE_SPECIAL_CRIME -> {
@@ -145,25 +145,23 @@ class CrimeListFragment : Fragment() {
             }
         }
 
-        override fun getItemCount(): Int = crimes.size
-
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val crime = crimes[position]
+            Log.i(TAG, "Adapter onBindViewHolder")
 
             if (holder is CrimeHolder) {
                 holder.apply {
-                    bind(crime)
+                    bind(getItem(position))
                 }
             } else if (holder is SpecialCrimeHolder) {
                 holder.apply {
-                    bind(crime)
+                    bind(getItem(position))
                 }
             }
         }
 
         override fun getItemViewType(position: Int): Int {
             //temp. fix
-            return if(crimes[position].title == "null" ) {
+            return if(getItem(position).title == "null" ) {
                 TYPE_SPECIAL_CRIME
             } else {
                 TYPE_CRIME
@@ -171,9 +169,26 @@ class CrimeListFragment : Fragment() {
         }
     }
 
-    private fun updateUI(crimes: List<Crime>) {
-        adapter = CrimeAdapter(crimes)
+    private fun updateUI(crimes: MutableList<Crime>) {
+        adapter?.let {
+            Log.d(TAG, "submitList")
+            it.submitList(crimes)
+        } ?: run {
+            adapter = CrimeAdapter()
+        }
         crimeRecyclerView.adapter = adapter
+    }
+
+    private inner class CrimeDiffCallback : DiffUtil.ItemCallback<Crime>() {
+        override fun areItemsTheSame(oldItem: Crime, newItem: Crime): Boolean {
+            Log.d(TAG, "areItemsSame")
+            return oldItem.title == newItem.title
+        }
+
+        override fun areContentsTheSame(oldItem: Crime, newItem: Crime): Boolean {
+            Log.d(TAG, "areContentsSame")
+            return oldItem == newItem
+        }
     }
 
     companion object {

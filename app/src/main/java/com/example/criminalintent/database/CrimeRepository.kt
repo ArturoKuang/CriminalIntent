@@ -1,6 +1,7 @@
 package com.example.criminalintent.database
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import androidx.room.Room
 import com.example.criminalintent.Crime
 import java.lang.IllegalStateException
@@ -17,8 +18,8 @@ class CrimeRepository private constructor(context: Context) {
 
     private val crimeDao = database.crimeDao()
 
-    fun getCrime() : List<Crime> = crimeDao.getCrimes();
-    fun getCrime(id: UUID): Crime? = crimeDao.getCrimes(id)
+    fun getCrimes() : LiveData<List<Crime>> = crimeDao.getCrimes();
+    fun getCrime(id: UUID): LiveData<Crime?> = crimeDao.getCrimes(id)
 
     companion object {
         private var INSTANCE: CrimeRepository? = null

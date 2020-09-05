@@ -147,21 +147,23 @@ class CrimeListFragment : Fragment() {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             Log.i(TAG, "Adapter onBindViewHolder")
+            val crime = getItem(position)
 
             if (holder is CrimeHolder) {
                 holder.apply {
-                    bind(getItem(position))
+                    bind(crime)
                 }
             } else if (holder is SpecialCrimeHolder) {
                 holder.apply {
-                    bind(getItem(position))
+                    bind(crime)
                 }
             }
         }
 
         override fun getItemViewType(position: Int): Int {
             //temp. fix
-            return if(getItem(position).title == "null" ) {
+            val crime = getItem(position)
+            return if(crime.title == "null" ) {
                 TYPE_SPECIAL_CRIME
             } else {
                 TYPE_CRIME

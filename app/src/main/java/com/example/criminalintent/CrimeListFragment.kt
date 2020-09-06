@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.criminalintent.database.Crime
 import java.lang.Exception
 import java.text.DateFormat
 import java.util.*
@@ -188,11 +189,7 @@ class CrimeListFragment : Fragment() {
 
         override fun getItemViewType(position: Int): Int {
             val crime = getItem(position)
-            return if(crime.requiresPolice ) {
-                TYPE_SPECIAL_CRIME
-            } else {
-                TYPE_CRIME
-            }
+            return TYPE_CRIME
         }
     }
 

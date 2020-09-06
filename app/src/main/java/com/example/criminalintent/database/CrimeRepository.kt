@@ -3,7 +3,6 @@ package com.example.criminalintent.database
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.Room
-import com.example.criminalintent.Crime
 import java.lang.IllegalStateException
 import java.util.*
 import java.util.concurrent.Executors

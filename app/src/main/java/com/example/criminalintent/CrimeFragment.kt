@@ -1,6 +1,8 @@
 package com.example.criminalintent
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.Editable
@@ -16,6 +18,7 @@ import java.sql.Time
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.log
 
 private const val TAG = "CrimeFragment"
 private const val DATE_FORMAT = "EEE, MMM, dd"
@@ -137,6 +140,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                 startActivityForResult(pickContactIntent, REQUEST_CONTACT)
             }
         }
+
     }
 
     override fun onStop() {
@@ -168,16 +172,40 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
     }
 
     private fun updateUI() {
-        val timeformat: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+        val timeFormat: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
         titleField.setText(crime.title)
         dateButton.text = crime.date.toString()
-        timeButton.text = timeformat.format(crime.date.time).toString()
+        timeButton.text = timeFormat.format(crime.date.time).toString()
         solvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
         }
         if(crime.suspect.isNotEmpty()) {
             suspectButton.text = crime.suspect
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when {
+            resultCode != Activity.RESULT_OK -> return
+
+            requestCode == REQUEST_CONTACT && data != null -> {
+                val contactUri: Uri? = data.data
+                val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+                val cursor = requireActivity().contentResolver
+                    .query(contactUri!!, queryFields, null, null, null)
+                cursor?.use {   cursor ->
+                    if(cursor.count == 0) {
+                        return
+                    }
+
+                    cursor.moveToFirst()
+                    val suspect = cursor.getString(0)
+                    crime.suspect = suspect
+                    crimeDetailViewModel.saveCrime(crime)
+                    suspectButton.text = suspect
+                }
+            }
         }
     }
 

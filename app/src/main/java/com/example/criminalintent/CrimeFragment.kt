@@ -1,32 +1,41 @@
 package com.example.criminalintent
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import java.sql.Time
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 private const val TAG = "CrimeFragment"
+private const val DATE_FORMAT = "EEE, MMM, dd"
 private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "DialogDate"
 private const val DIALOG_TIME = "DialogTime"
 private const val REQUEST_DATE = 0
-private const val REQUEST_TIME = 0
+private const val REQUEST_TIME = 2
+private const val REQUEST_CONTACT = 3
+
 
 class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragment.Callbacks {
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
     private lateinit var timeButton: Button
+    private lateinit var reportButton: Button
+    private lateinit var suspectButton: Button
+    private lateinit var photoButton: ImageButton
+    private lateinit var photoView: ImageView
     private lateinit var solvedCheckBox: CheckBox
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
         ViewModelProvider(this).get(CrimeDetailViewModel::class.java)
@@ -49,8 +58,11 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         titleField = view.findViewById(R.id.crime_title) as EditText
         dateButton = view.findViewById(R.id.crime_date) as Button
         timeButton = view.findViewById(R.id.crime_time) as Button
+        photoButton = view.findViewById(R.id.crime_camera) as ImageButton
+        photoView = view.findViewById(R.id.crime_photo) as ImageView
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
-
+        reportButton = view.findViewById(R.id.crime_report) as Button
+        suspectButton = view.findViewById(R.id.crime_suspect) as Button
         return view
     }
 
@@ -103,6 +115,28 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                 show(this@CrimeFragment.parentFragmentManager, DIALOG_TIME)
             }
         }
+
+        reportButton.setOnClickListener() {
+            Intent(Intent.ACTION_SEND).apply {
+                type="text/plain"
+                putExtra(Intent.EXTRA_TEXT, getCrimeReport())
+                putExtra(Intent.EXTRA_SUBJECT,
+                    getString(R.string.crime_report_subject))
+            }.also {
+                intent ->
+                val chooserIntent = Intent.createChooser(intent, getString(R.string.send_report))
+                startActivity(chooserIntent)
+            }
+        }
+
+        suspectButton.apply {
+            val pickContactIntent =
+                Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+
+            setOnClickListener {
+                startActivityForResult(pickContactIntent, REQUEST_CONTACT)
+            }
+        }
     }
 
     override fun onStop() {
@@ -133,6 +167,43 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         )
     }
 
+    private fun updateUI() {
+        val timeformat: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+        titleField.setText(crime.title)
+        dateButton.text = crime.date.toString()
+        timeButton.text = timeformat.format(crime.date.time).toString()
+        solvedCheckBox.apply {
+            isChecked = crime.isSolved
+            jumpDrawablesToCurrentState()
+        }
+        if(crime.suspect.isNotEmpty()) {
+            suspectButton.text = crime.suspect
+        }
+    }
+
+    private fun getCrimeReport(): String {
+        val solvedString = if(crime.isSolved) {
+            getString(R.string.crime_report_solved)
+        } else {
+            getString(R.string.crime_report_unsolved)
+        }
+
+        val dateString = with(DateFormat.getInstance()) {
+            (this as SimpleDateFormat).applyPattern(DATE_FORMAT)
+            this.format(crime.date).toString()
+        }
+        Log.d(TAG, "Date string: $dateString")
+
+        val suspect = if (crime.suspect.isBlank()) {
+            getString(R.string.crime_report_no_suspect)
+        } else {
+            getString(R.string.crime_report_suspect, crime.suspect)
+        }
+
+        return getString(R.string.crime_report,
+            crime.title, dateString, solvedString, suspect)
+    }
+
     companion object {
         fun newInstance(crimeId: UUID): CrimeFragment {
             val args = Bundle().apply {
@@ -144,14 +215,4 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         }
     }
 
-    private fun updateUI() {
-        val timeformat: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
-        titleField.setText(crime.title)
-        dateButton.text = crime.date.toString()
-        timeButton.text = timeformat.format(crime.date.time).toString()
-        solvedCheckBox.apply {
-            isChecked = crime.isSolved
-            jumpDrawablesToCurrentState()
-        }
-    }
 }

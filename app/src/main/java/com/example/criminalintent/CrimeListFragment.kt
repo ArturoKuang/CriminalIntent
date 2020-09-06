@@ -187,9 +187,8 @@ class CrimeListFragment : Fragment() {
         }
 
         override fun getItemViewType(position: Int): Int {
-            //temp. fix
             val crime = getItem(position)
-            return if(crime.title == "null" ) {
+            return if(crime.requiresPolice ) {
                 TYPE_SPECIAL_CRIME
             } else {
                 TYPE_CRIME

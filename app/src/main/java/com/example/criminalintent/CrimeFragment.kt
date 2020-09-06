@@ -170,6 +170,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                 return
             }
 
+            isEnabled = true
             Toast.makeText(context, crime.phone, Toast.LENGTH_SHORT)
         }
     }
@@ -213,6 +214,10 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         }
         if (crime.suspect.isNotEmpty()) {
             suspectButton.text = crime.suspect
+        }
+
+        if (crime.phone.isNotEmpty()) {
+            callButton.text = crime.phone
         }
     }
 
@@ -263,6 +268,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                         cursorPhone.moveToNext()
                     }
                     callButton.isEnabled = true
+                    callButton.text = phoneNumber
                 }
 
                 if(allNumbers.size > 0) {

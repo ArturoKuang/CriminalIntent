@@ -16,6 +16,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
@@ -54,6 +55,9 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
     private lateinit var photoButton: ImageButton
     private lateinit var photoView: ImageView
     private lateinit var solvedCheckBox: CheckBox
+    private lateinit var observer: ViewTreeObserver
+    private var photoViewWidth: Int = 0
+    private var photoViewHeight: Int = 0
 
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
         ViewModelProvider(this).get(CrimeDetailViewModel::class.java)
@@ -225,6 +229,12 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                 }
             }
         }
+
+        observer = photoView.viewTreeObserver
+        observer.addOnGlobalLayoutListener {
+            photoViewWidth = photoView.width
+            photoViewHeight = photoView.height
+        }
     }
 
     override fun onStop() {
@@ -281,11 +291,12 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         }
 
         updatePhotoView()
+
     }
 
     private fun updatePhotoView() {
         if(photoFile.exists()) {
-            val bitmap = getScaledBitmap(photoFile.path, requireActivity())
+            val bitmap = getScaledBitmap(photoFile.path, photoViewWidth, photoViewHeight)
             photoView.setImageBitmap(bitmap)
         } else {
             photoView.setImageBitmap(null)

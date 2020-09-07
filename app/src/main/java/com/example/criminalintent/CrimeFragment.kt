@@ -171,34 +171,6 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
             if (resolvedActivity == null) {
                 isEnabled = false
             }
-
-            photoButton.apply {
-                val packageManager: PackageManager = requireActivity().packageManager
-
-                val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                val resolvedActivity: ResolveInfo? =
-                    packageManager.resolveActivity(captureImage, PackageManager.MATCH_DEFAULT_ONLY)
-
-                if(resolvedActivity == null) {
-                    isEnabled = false
-                }
-
-                setOnClickListener {
-                    captureImage.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-
-                    val cameraActivities: List<ResolveInfo> =
-                        packageManager.queryIntentActivities(captureImage, PackageManager.MATCH_DEFAULT_ONLY)
-
-                    for(cameraActivity in cameraActivities) {
-                        requireActivity().grantUriPermission(
-                            cameraActivity.activityInfo.packageName,
-                            photoUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        )
-                    }
-                    startActivityForResult(captureImage, REQUEST_PHOTO)
-                }
-            }
         }
 
         callButton.apply {
@@ -213,11 +185,44 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                 isEnabled = false
             }
         }
+
+        photoButton.apply {
+            val packageManager: PackageManager = requireActivity().packageManager
+
+            val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            val resolvedActivity: ResolveInfo? =
+                packageManager.resolveActivity(captureImage, PackageManager.MATCH_DEFAULT_ONLY)
+
+            if(resolvedActivity == null) {
+                isEnabled = false
+            }
+
+            setOnClickListener {
+                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+
+                val cameraActivities: List<ResolveInfo> =
+                    packageManager.queryIntentActivities(captureImage, PackageManager.MATCH_DEFAULT_ONLY)
+
+                for(cameraActivity in cameraActivities) {
+                    requireActivity().grantUriPermission(
+                        cameraActivity.activityInfo.packageName,
+                        photoUri,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                }
+                startActivityForResult(captureImage, REQUEST_PHOTO)
+            }
+        }
     }
 
     override fun onStop() {
         super.onStop()
         crimeDetailViewModel.saveCrime(crime)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        requireActivity().revokeUriPermission(photoUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
     }
 
     override fun onDateSelected(date: Date) {
@@ -261,6 +266,17 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         if (crime.phone.isNotEmpty()) {
             callButton.text = getString(R.string.call_report, crime.phone)
             callButton.isEnabled = true
+        }
+
+        updatePhotoView()
+    }
+
+    private fun updatePhotoView() {
+        if(photoFile.exists()) {
+            val bitmap = getScaledBitmap(photoFile.path, requireActivity())
+            photoView.setImageBitmap(bitmap)
+        } else {
+            photoView.setImageBitmap(null)
         }
     }
 
@@ -318,6 +334,11 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                     crime.phone = allNumbers[0]
                 }
                 crimeDetailViewModel.saveCrime(crime)
+            }
+
+            requestCode == REQUEST_PHOTO -> {
+                requireActivity().revokeUriPermission(photoUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                updatePhotoView()
             }
         }
     }

@@ -55,7 +55,6 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
     private lateinit var photoButton: ImageButton
     private lateinit var photoView: ImageView
     private lateinit var solvedCheckBox: CheckBox
-    private lateinit var observer: ViewTreeObserver
     private var photoViewWidth: Int = 0
     private var photoViewHeight: Int = 0
 
@@ -230,8 +229,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
             }
         }
 
-        observer = photoView.viewTreeObserver
-        observer.addOnGlobalLayoutListener {
+        photoView.afterMeasured {
             photoViewWidth = photoView.width
             photoViewHeight = photoView.height
         }
@@ -301,6 +299,17 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         } else {
             photoView.setImageBitmap(null)
         }
+    }
+
+    private inline fun  ImageView.afterMeasured(crossinline f: ImageView.() -> Unit) {
+        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                if (measuredWidth > 0 && measuredHeight > 0) {
+                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    f()
+                }
+            }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

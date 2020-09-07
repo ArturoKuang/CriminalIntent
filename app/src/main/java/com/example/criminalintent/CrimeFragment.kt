@@ -1,10 +1,12 @@
 package com.example.criminalintent
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
+import android.nfc.Tag
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.Editable
@@ -81,6 +83,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         return view
     }
 
+    @SuppressLint("ShowToast")
     override fun onStart() {
         super.onStart()
 
@@ -165,13 +168,16 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         }
 
         callButton.apply {
-            if (crime.phone.isEmpty()) {
-                isEnabled = false
-                return
+            setOnClickListener {
+                val callIntent = Intent(Intent.ACTION_DIAL).apply {
+                    data = Uri.parse("tel:${crime.phone}")
+                }
+                startActivity(callIntent)
             }
 
-            isEnabled = true
-            Toast.makeText(context, crime.phone, Toast.LENGTH_SHORT)
+            if (crime.phone.isEmpty()) {
+                isEnabled = false
+            }
         }
     }
 
@@ -217,7 +223,8 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         }
 
         if (crime.phone.isNotEmpty()) {
-            callButton.text = crime.phone
+            callButton.text = getString(R.string.call_report, crime.phone)
+            callButton.isEnabled = true
         }
     }
 
@@ -268,7 +275,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                         cursorPhone.moveToNext()
                     }
                     callButton.isEnabled = true
-                    callButton.text = phoneNumber
+                    callButton.text = getString(R.string.call_report, phoneNumber)
                 }
 
                 if(allNumbers.size > 0) {
@@ -303,6 +310,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
             crime.title, dateString, solvedString, suspect
         )
     }
+
 
     companion object {
         fun newInstance(crimeId: UUID): CrimeFragment {

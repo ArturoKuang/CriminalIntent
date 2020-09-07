@@ -33,10 +33,12 @@ private const val DATE_FORMAT = "EEE, MMM, dd"
 private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "DialogDate"
 private const val DIALOG_TIME = "DialogTime"
+private const val DIALOG_PHOTO = "DialogPhoto"
 private const val REQUEST_DATE = 0
 private const val REQUEST_TIME = 2
 private const val REQUEST_CONTACT = 3
 private const val REQUEST_PHOTO = 4
+private const val REQUEST_ENLARGE_PHOTO = 5
 
 
 class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragment.Callbacks {
@@ -211,6 +213,16 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
                     )
                 }
                 startActivityForResult(captureImage, REQUEST_PHOTO)
+            }
+        }
+
+        photoView.apply {
+            setOnClickListener {
+                val bitmap = getScaledBitmap(photoFile.path, requireActivity())
+                DetailDisplayFragment.newInstance(bitmap).apply {
+                    setTargetFragment(this@CrimeFragment, REQUEST_ENLARGE_PHOTO)
+                    show(this@CrimeFragment.parentFragmentManager, DIALOG_PHOTO)
+                }
             }
         }
     }

@@ -26,7 +26,6 @@ import com.example.criminalintent.database.Crime
 import java.io.File
 import java.sql.Time
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 private const val TAG = "CrimeFragment"
@@ -272,8 +271,10 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
 
     private fun updateUI() {
         val timeFormat: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+        val df:DateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
+
         titleField.setText(crime.title)
-        dateButton.text = crime.date.toString()
+        dateButton.text = df.format(crime.date).toString()
         timeButton.text = timeFormat.format(crime.date.time).toString()
         solvedCheckBox.apply {
             isChecked = crime.isSolved
@@ -296,8 +297,10 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         if(photoFile.exists()) {
             val bitmap = getScaledBitmap(photoFile.path, photoViewWidth, photoViewHeight)
             photoView.setImageBitmap(bitmap)
+            photoView.contentDescription = getString(R.string.crime_photo_image_description)
         } else {
             photoView.setImageBitmap(null)
+            photoView.contentDescription = getString(R.string.crime_photo_no_image_description)
         }
     }
 
@@ -382,10 +385,8 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
             getString(R.string.crime_report_unsolved)
         }
 
-        val dateString = with(DateFormat.getInstance()) {
-            (this as SimpleDateFormat).applyPattern(DATE_FORMAT)
-            this.format(crime.date).toString()
-        }
+        val dateString = DateFormat.getDateInstance(DateFormat.SHORT).format(crime.date).toString()
+
         Log.d(TAG, "Date string: $dateString")
 
         val suspect = if (crime.suspect.isBlank()) {

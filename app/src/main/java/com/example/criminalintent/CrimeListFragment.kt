@@ -99,50 +99,22 @@ class CrimeListFragment : Fragment() {
         callbacks = null
     }
 
-    private inner class CrimeHolder(view: View) :
-        RecyclerView.ViewHolder(view), View.OnClickListener {
-
-        private lateinit var crime: Crime
-        private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
-        private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
-        private val solvedImageView: ImageView = itemView.findViewById(R.id.crime_solved)
-
-        init {
-            itemView.setOnClickListener(this)
-        }
-
-        fun bind(crime: Crime) {
-            this.crime = crime
-            titleTextView.text = this.crime.title
-            val dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
-            dateTextView.text = dateFormat.format(this.crime.date).toString()
-
-            solvedImageView.visibility = if (crime.isSolved) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-        }
-
-        override fun onClick(p0: View?) {
-            callbacks?.onCrimeSelected(crime.id)
-        }
-    }
-
     private inner class CrimeAdapter()
         : ListAdapter<Crime, RecyclerView.ViewHolder>(CrimeDiffCallback()) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
                 : RecyclerView.ViewHolder {
-            Log.i(TAG, "Adapter onCreateViewHolder")
-            var view:View
             return when(viewType) {
                 TYPE_CRIME -> {
-                    view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
-                    CrimeHolder(view)
+                    createCrimeViewHolder(parent)
                 }
                 else -> throw Exception("ViewType is not supported")
             }
+        }
+
+        private fun createCrimeViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
+            val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
+            return CrimeHolder(view)
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -161,11 +133,49 @@ class CrimeListFragment : Fragment() {
         }
     }
 
+    private inner class CrimeHolder(view: View) :
+        RecyclerView.ViewHolder(view), View.OnClickListener {
+
+        private lateinit var crime: Crime
+        private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
+        private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
+        private val solvedImageView: ImageView = itemView.findViewById(R.id.crime_solved)
+
+        init {
+            itemView.setOnClickListener(this)
+        }
+
+        fun bind(crime: Crime) {
+            this.crime = crime
+            setTitleText()
+            setDateText()
+            setImageView()
+        }
+
+        private fun setTitleText() {
+            titleTextView.text = this.crime.title
+        }
+
+        private fun setDateText() {
+            val dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
+            dateTextView.text = dateFormat.format(this.crime.date).toString()
+        }
+
+        private fun setImageView() {
+            solvedImageView.visibility = if (crime.isSolved) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        }
+
+        override fun onClick(p0: View?) {
+            callbacks?.onCrimeSelected(crime.id)
+        }
+    }
+
     private fun updateUI(crimes: MutableList<Crime>) {
-        adapter?.let {
-            Log.d(TAG, "submitList")
-            it.submitList(crimes)
-        } ?: run {
+        adapter?.submitList(crimes) ?: run {
             adapter = CrimeAdapter()
         }
         crimeRecyclerView.adapter = adapter
@@ -173,12 +183,10 @@ class CrimeListFragment : Fragment() {
 
     private inner class CrimeDiffCallback : DiffUtil.ItemCallback<Crime>() {
         override fun areItemsTheSame(oldItem: Crime, newItem: Crime): Boolean {
-            Log.d(TAG, "areItemsSame")
             return oldItem.title == newItem.title
         }
 
         override fun areContentsTheSame(oldItem: Crime, newItem: Crime): Boolean {
-            Log.d(TAG, "areContentsSame")
             return oldItem == newItem
         }
     }

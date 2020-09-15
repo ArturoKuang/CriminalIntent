@@ -32,5 +32,4 @@ class MainActivity : AppCompatActivity(),
             .addToBackStack(null)
             .commit()
     }
-
 }

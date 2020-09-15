@@ -379,17 +379,13 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
 
     private fun updatePhotoView() {
         if(photoFile.exists()) {
-            changePhotoView()
+            val bitmap = getScaledBitmap(photoFile.path, photoViewWidth, photoViewHeight)
+            photoView.setImageBitmap(bitmap)
+            photoView.contentDescription = getString(R.string.crime_photo_image_description)
         } else {
             photoView.setImageBitmap(null)
             photoView.contentDescription = getString(R.string.crime_photo_no_image_description)
         }
-    }
-
-    private fun changePhotoView() {
-        val bitmap = getScaledBitmap(photoFile.path, photoViewWidth, photoViewHeight)
-        photoView.setImageBitmap(bitmap)
-        photoView.contentDescription = getString(R.string.crime_photo_image_description)
     }
 
     private fun resolveContactRequest(data: Intent) {

@@ -183,6 +183,26 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
         }
     }
 
+    private fun getCrimeReport(): String {
+        val solvedString = if (crime.isSolved) {
+            getString(R.string.crime_report_solved)
+        } else {
+            getString(R.string.crime_report_unsolved)
+        }
+
+        val dateString = DateFormat.getDateInstance(DateFormat.SHORT).format(crime.date).toString()
+        val suspect = if (crime.suspect.isBlank()) {
+            getString(R.string.crime_report_no_suspect)
+        } else {
+            getString(R.string.crime_report_suspect, crime.suspect)
+        }
+
+        return getString(
+            R.string.crime_report,
+            crime.title, dateString, solvedString, suspect
+        )
+    }
+
     private fun initSuspectButtonListener() {
         suspectButton.apply {
             val pickContactIntent =
@@ -260,26 +280,6 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
             }
         }
 
-    }
-
-    private fun getCrimeReport(): String {
-        val solvedString = if (crime.isSolved) {
-            getString(R.string.crime_report_solved)
-        } else {
-            getString(R.string.crime_report_unsolved)
-        }
-
-        val dateString = DateFormat.getDateInstance(DateFormat.SHORT).format(crime.date).toString()
-        val suspect = if (crime.suspect.isBlank()) {
-            getString(R.string.crime_report_no_suspect)
-        } else {
-            getString(R.string.crime_report_suspect, crime.suspect)
-        }
-
-        return getString(
-            R.string.crime_report,
-            crime.title, dateString, solvedString, suspect
-        )
     }
 
     override fun onStop() {

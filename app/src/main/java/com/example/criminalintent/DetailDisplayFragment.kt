@@ -12,14 +12,15 @@ import java.util.*
 private const val ARG_BITMAP = "bitmap"
 
 class DetailDisplayFragment: DialogFragment() {
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return  activity?.let {
             val builder = AlertDialog.Builder(it)
             val inflater = requireActivity().layoutInflater
-
             val view = inflater.inflate(R.layout.detail_image_dialog, null)
             val imageView = view.findViewById(R.id.crime_photo) as ImageView
             val imageBitmap = arguments?.getParcelable(ARG_BITMAP) as Bitmap?
+
             imageView.setImageBitmap(imageBitmap)
             builder.setView(view)
             builder.create()

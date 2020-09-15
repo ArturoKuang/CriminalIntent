@@ -22,9 +22,9 @@ import java.util.*
 
 private const val TAG = "CrimeListFragment"
 private const val TYPE_CRIME = 0
-private const val TYPE_SPECIAL_CRIME = 1
 
 class CrimeListFragment : Fragment() {
+
     interface Callbacks {
         fun onCrimeSelected(crimeId: UUID)
     }

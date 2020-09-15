@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit
 private const val ARG_TIME = "time"
 
 class TimePickerFragment : DialogFragment() {
+
     interface Callbacks {
         fun onTimeSelected(time: Time)
     }
@@ -38,8 +39,6 @@ class TimePickerFragment : DialogFragment() {
         val hours = calender.get(Calendar.HOUR_OF_DAY)
         val minute = calender.get(Calendar.MINUTE)
 
-        Log.d("TIMEPICKER", "{$hours} : {$minute}")
-
         return TimePickerDialog(
             requireContext(),
             timeListener,
@@ -50,7 +49,6 @@ class TimePickerFragment : DialogFragment() {
 
     }
 
-  
     companion object {
         fun newInstance(time: Time): TimePickerFragment {
             val args = Bundle().apply {

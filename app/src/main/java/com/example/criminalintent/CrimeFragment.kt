@@ -272,7 +272,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
     private fun initPhotoViewListener() {
         photoView.apply {
             setOnClickListener {
-                val bitmap = getScaledBitmap(photoFile.path, requireActivity())
+                val bitmap = getScaledBitmap(photoFile.path, photoViewWidth, photoViewHeight)
                 DetailDisplayFragment.newInstance(bitmap).apply {
                     setTargetFragment(this@CrimeFragment, REQUEST_ENLARGE_PHOTO)
                     show(this@CrimeFragment.parentFragmentManager, DIALOG_PHOTO)
@@ -456,7 +456,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks, TimePickerFragme
 
     private fun getAllPhoneNumbers(cursor: Cursor): ArrayList<String> {
         val allNumbers: ArrayList<String> = arrayListOf<String>()
-        var phoneNumber: String = ""
+        var phoneNumber: String
 
         while (!cursor.isAfterLast)
         {

@@ -1,4 +1,4 @@
-package com.example.criminalintent
+package com.example.criminalintent.database
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
